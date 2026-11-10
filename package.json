@@ -1,0 +1,20 @@
+{
+  "name": "facebook-poster-dashboard",
+  "version": "1.0.0",
+  "description": "Zero-framework demo dashboard for publishing posts to Facebook via Meta Graph API",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "keywords": [
+    "facebook",
+    "meta-graph-api",
+    "dashboard",
+    "vanilla-js"
+  ],
+  "author": "",
+  "license": "ISC"
+}
+

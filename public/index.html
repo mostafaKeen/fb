@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Facebook Post Dashboard</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Top Navigation Header -->
+  <header class="app-header">
+    <div class="header-left">
+      <div class="logo-badge">
+        <svg viewBox="0 0 24 24" class="fb-icon" fill="currentColor">
+          <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+        </svg>
+      </div>
+      <div>
+        <h1 class="app-title">Facebook Post Studio</h1>
+        <p class="app-subtitle">Zero-Framework Meta Graph API Demo</p>
+      </div>
+    </div>
+
+    <div class="header-right">
+      <!-- Demo Mode Toggle -->
+      <button id="toggleMockBtn" class="btn btn-sm btn-ghost demo-pill" title="Test dashboard without Meta token">
+        🧪 Demo Mode: <span id="mockStatusText">OFF</span>
+      </button>
+
+      <!-- Page Status Pill -->
+      <div id="pageStatusPill" class="status-pill status-disconnected">
+        <span class="status-dot"></span>
+        <span id="pageStatusLabel" class="status-text">Checking connection...</span>
+      </div>
+
+      <!-- Settings Trigger -->
+      <button id="openSettingsBtn" class="btn btn-secondary btn-icon" title="API Credentials & Settings">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+        <span>Settings</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Banner for Missing Setup -->
+  <div id="setupBanner" class="banner banner-warning" style="display: none;">
+    <div class="banner-content">
+      <strong>Credentials Needed:</strong> Meta Graph API requires a Page ID and Page Access Token.
+      <button id="bannerSetupBtn" class="banner-link">Configure Credentials</button>
+      or
+      <button id="bannerMockBtn" class="banner-link">Try Demo Sandbox Mode</button>
+    </div>
+  </div>
+
+  <main class="main-container">
+    <div class="grid-layout">
+
+      <!-- LEFT: Post Composer Section -->
+      <section class="card composer-card">
+        <div class="card-header">
+          <h2 class="card-title">Compose Post</h2>
+          <span class="badge badge-info" id="postTypeBadge">Page Feed Post</span>
+        </div>
+
+        <form id="postForm" class="composer-form">
+          <!-- Post Format Switcher -->
+          <div class="format-tabs">
+            <button type="button" class="tab-btn active" data-type="feed">Standard Post</button>
+            <button type="button" class="tab-btn" data-type="photo">Photo Post</button>
+          </div>
+
+          <!-- Message Input -->
+          <div class="form-group">
+            <label for="postMessage" class="form-label">
+              <span>Post Content</span>
+              <span id="charCount" class="char-counter">0 characters</span>
+            </label>
+            <textarea
+              id="postMessage"
+              class="form-control post-textarea"
+              rows="4"
+              placeholder="What would you like to share to your Facebook Page?"
+              required
+            ></textarea>
+          </div>
+
+          <!-- Optional Link Input (For Standard Post) -->
+          <div id="linkGroup" class="form-group">
+            <label for="postLink" class="form-label">
+              <span>Attached Link (Optional)</span>
+            </label>
+            <input
+              type="url"
+              id="postLink"
+              class="form-control"
+              placeholder="https://example.com/article"
+            />
+          </div>
+
+          <!-- Optional Photo Input (For Photo Post) -->
+          <div id="photoGroup" class="form-group" style="display: none;">
+            <label class="form-label">
+              <span>Attach Image</span>
+              <span class="label-hint">(URL or Local File)</span>
+            </label>
+            
+            <input
+              type="url"
+              id="postImageUrl"
+              class="form-control"
+              placeholder="Paste public image URL (https://...)"
+              style="margin-bottom: 8px;"
+            />
+
+            <div class="file-upload-wrapper">
+              <span class="upload-or">OR</span>
+              <input type="file" id="postImageFile" accept="image/*" class="form-control file-input" />
+            </div>
+          </div>
+
+          <!-- Post Scheduling Toggle -->
+          <div class="form-group schedule-box">
+            <label class="checkbox-container">
+              <input type="checkbox" id="scheduleCheckbox" />
+              <span class="checkbox-label">Schedule Post for Later</span>
+            </label>
+            <div id="scheduleTimeContainer" style="display: none; margin-top: 10px;">
+              <label for="scheduleDateTime" class="form-label">
+                <span>Select Publish Date & Time</span>
+                <span class="label-hint">(Between 10 mins and 75 days in future)</span>
+              </label>
+              <input type="datetime-local" id="scheduleDateTime" class="form-control" />
+            </div>
+          </div>
+
+          <!-- Target Info Summary -->
+          <div class="target-summary">
+            <span class="target-label">Publishing to:</span>
+            <strong id="targetPageNameDisplay">Facebook Page</strong>
+          </div>
+
+          <!-- Notification feedback -->
+          <div id="formAlert" class="alert" style="display: none;"></div>
+
+          <!-- Actions -->
+          <div class="form-actions">
+            <button type="button" id="clearFormBtn" class="btn btn-ghost">Reset</button>
+            <button type="submit" id="publishBtn" class="btn btn-primary">
+              <span class="btn-spinner" style="display: none;"></span>
+              <span class="btn-text">Publish to Facebook</span>
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <!-- RIGHT: Live Facebook Post Preview -->
+      <section class="card preview-card">
+        <div class="card-header">
+          <h2 class="card-title">Live Preview</h2>
+          <span class="preview-badge" id="previewModeBadge">Facebook Feed Mock</span>
+        </div>
+
+        <div class="facebook-mock">
+          <!-- Mock Header -->
+          <div class="fb-post-header">
+            <img
+              id="mockPageAvatar"
+              src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100&h=100&fit=crop"
+              alt="Page Avatar"
+              class="fb-avatar"
+            />
+            <div class="fb-post-meta">
+              <div class="fb-page-title-row">
+                <span id="mockPageName" class="fb-page-name">Your Page Name</span>
+                <svg class="fb-verified-badge" viewBox="0 0 24 24" width="14" height="14" fill="#1877F2">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+              </div>
+              <div class="fb-timestamp">
+                <span id="mockTimestamp">Just now</span>
+                <span class="dot-separator">·</span>
+                <svg viewBox="0 0 16 16" width="12" height="12" fill="currentColor">
+                  <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zm0 14.5a6.5 6.5 0 1 1 0-13 6.5 6.5 0 0 1 0 13zM8 3a5 5 0 1 0 0 10A5 5 0 0 0 8 3z"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mock Post Body Text -->
+          <div id="mockBodyText" class="fb-post-body">
+            Start typing your post in the composer on the left to see the live preview...
+          </div>
+
+          <!-- Mock Photo Preview -->
+          <div id="mockPhotoContainer" class="fb-media-container" style="display: none;">
+            <img id="mockPhotoImage" src="" alt="Post image preview" class="fb-media-image"/>
+          </div>
+
+          <!-- Mock Link Attachment -->
+          <div id="mockLinkContainer" class="fb-link-card" style="display: none;">
+            <div class="fb-link-text">
+              <span id="mockLinkDomain" class="fb-link-domain">EXAMPLE.COM</span>
+              <span id="mockLinkUrl" class="fb-link-title">Attached External Link</span>
+            </div>
+          </div>
+
+          <!-- Mock Engagement Footer -->
+          <div class="fb-post-footer">
+            <div class="fb-action-btn">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>
+              </svg>
+              <span>Like</span>
+            </div>
+            <div class="fb-action-btn">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+              </svg>
+              <span>Comment</span>
+            </div>
+            <div class="fb-action-btn">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="18" cy="5" r="3"></circle>
+                <circle cx="6" cy="12" r="3"></circle>
+                <circle cx="18" cy="19" r="3"></circle>
+                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+              </svg>
+              <span>Share</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- BOTTOM: Activity / History Table -->
+    <section class="card history-card">
+      <div class="card-header">
+        <div>
+          <h2 class="card-title">Activity & Published Posts</h2>
+          <span class="preview-badge">Tracks recent session posts & live page feed</span>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button id="fetchFeedBtn" class="btn btn-sm btn-secondary">Fetch Live Page Feed</button>
+          <button id="clearHistoryBtn" class="btn btn-sm btn-ghost">Clear Log</button>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>Status</th>
+              <th>Message Excerpt</th>
+              <th>Type</th>
+              <th>Time</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="historyTableBody">
+            <tr id="emptyHistoryRow">
+              <td colspan="5" class="empty-state">No posts published during this session yet.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- Settings Modal for Meta Credentials -->
+  <div id="settingsModal" class="modal-overlay" style="display: none;">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">Meta Graph API Settings</h3>
+        <button id="closeSettingsBtn" class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-desc">
+          Configure your Facebook Page credentials below. You can obtain them directly using the
+          <a href="https://developers.facebook.com/tools/explorer/" target="_blank" rel="noopener">Meta Graph API Explorer</a>.
+        </p>
+
+        <form id="settingsForm">
+          <div class="form-group">
+            <label for="settingsPageId" class="form-label">Facebook Page ID</label>
+            <input
+              type="text"
+              id="settingsPageId"
+              class="form-control"
+              placeholder="e.g. 1922312981386096"
+              required
+            />
+            <small class="form-text">Found in your Facebook Page About info or Business Manager.</small>
+          </div>
+
+          <div class="form-group">
+            <label for="settingsAccessToken" class="form-label">Page Access Token</label>
+            <textarea
+              id="settingsAccessToken"
+              class="form-control"
+              rows="3"
+              placeholder="Starts with EAA..."
+              required
+            ></textarea>
+            <small class="form-text">Must have <code>pages_manage_posts</code> and <code>pages_read_engagement</code> permissions.</small>
+          </div>
+
+          <div id="settingsAlert" class="alert" style="display: none;"></div>
+
+          <div class="modal-actions">
+            <button type="button" id="testConnectionBtn" class="btn btn-secondary">
+              <span class="btn-spinner" style="display: none;"></span>
+              <span class="btn-text">Test Connection</span>
+            </button>
+            <button type="submit" class="btn btn-primary">Save Settings</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
